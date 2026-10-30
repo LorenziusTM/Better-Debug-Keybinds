@@ -32,3 +32,9 @@ Run `.\gradlew.bat runClient`, create or load a world, and verify all six action
 ## License
 
 Released under CC0-1.0; see [LICENSE](./LICENSE).
+
+## License
+
+Support me!
+
+https://buymeacoffee.com/lorenzius
