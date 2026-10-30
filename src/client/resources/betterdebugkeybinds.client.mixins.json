@@ -3,7 +3,7 @@
 	"package": "com.lorenzius.betterdebugkeybinds.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ExampleClientMixin"
+		"GlobalInputMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

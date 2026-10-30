@@ -1,0 +1,9 @@
+{
+	"key.category.betterdebugkeybinds.debug_keybinds": "Better Debug Keybinds",
+	"key.betterdebugkeybinds.reload_chunks": "Reload Chunks",
+	"key.betterdebugkeybinds.reload_resource_pack": "Reload Resource Pack",
+	"key.betterdebugkeybinds.clear_chat": "Clear Chat",
+	"key.betterdebugkeybinds.reload_sounds": "Reload Sounds",
+	"key.betterdebugkeybinds.toggle_chunk_borders": "Toggle Chunk Borders",
+	"key.betterdebugkeybinds.toggle_hitboxes": "Toggle Hitboxes"
+}

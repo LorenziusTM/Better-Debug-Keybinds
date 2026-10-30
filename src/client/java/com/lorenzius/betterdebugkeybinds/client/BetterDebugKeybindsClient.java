@@ -1,10 +1,15 @@
 package com.lorenzius.betterdebugkeybinds.client;
 
+import com.lorenzius.betterdebugkeybinds.client.keybind.KeybindManager;
+import com.lorenzius.betterdebugkeybinds.client.input.GlobalInputHandler;
 import net.fabricmc.api.ClientModInitializer;
 
 public class BetterDebugKeybindsClient implements ClientModInitializer {
+	public static final String MOD_ID = "betterdebugkeybinds";
+
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+		KeybindManager.register();
+		GlobalInputHandler.register();
 	}
 }

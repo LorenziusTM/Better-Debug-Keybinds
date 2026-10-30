@@ -2,28 +2,23 @@
 	"schemaVersion": 1,
 	"id": "betterdebugkeybinds",
 	"version": "${version}",
-	"name": "BetterDebugKeybinds",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Better Debug Keybinds",
+	"description": "Rebind Minecraft debug actions to independent client-side shortcuts.",
 	"authors": [
-		"Me!"
+		"Lorenzius"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/LorenziusTM/Better-Debug-Keybinds"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/betterdebugkeybinds/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"com.lorenzius.betterdebugkeybinds.BetterDebugKeybinds"
-		],
 		"client": [
 			"com.lorenzius.betterdebugkeybinds.client.BetterDebugKeybindsClient"
 		]
 	},
 	"mixins": [
-		"betterdebugkeybinds.mixins.json",
 		{
 			"config": "betterdebugkeybinds.client.mixins.json",
 			"environment": "client"
