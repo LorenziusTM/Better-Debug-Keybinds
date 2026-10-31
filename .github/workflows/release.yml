@@ -51,7 +51,7 @@ jobs:
             fi
 
             release_date="$(date -u +'%Y.%d.%m')"
-            prefix="vbetterdebugkeybinds-${minecraft_version}-${release_date}."
+            prefix="betterdebugkeybinds-v${minecraft_version}-${release_date}."
             counter=-1
             existing_commit_tag=""
             while IFS= read -r existing_tag; do
