@@ -27,7 +27,7 @@ Java formatting is checked by Spotless in GitHub Actions on every push and pull 
 
 ## Releases
 
-Every push to `main` creates a GitHub Release with the built mod JAR. Release tags use `v<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `v26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases that day. Pushing a `v*` tag also publishes a release for that tag.
+Every push to `main` creates a GitHub Release with the built mod JAR. Release tags use `v<mod name>-<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `vbetterdebugkeybinds-26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases that day. Pushing a `v*` tag also publishes a release for that tag.
 
 ## VS Code
 
