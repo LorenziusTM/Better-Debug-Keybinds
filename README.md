@@ -25,6 +25,10 @@ Run `.\gradlew.bat build` on Windows.
 
 Java formatting is checked by Spotless in GitHub Actions on every push and pull request. Run `.\gradlew.bat spotlessCheck` locally to check formatting, or `.\gradlew.bat spotlessApply` to format the Java sources.
 
+## Releases
+
+Every push to `main` creates a GitHub Release with the built mod JAR. Release tags use `v<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `v26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases that day. Pushing a `v*` tag also publishes a release for that tag.
+
 ## VS Code
 
 Open the repository root as the workspace and install the recommended Java and Gradle extensions. VS Code is configured to import dependencies and source sets from the Gradle wrapper automatically. If Minecraft imports are still unresolved, run **Java: Clean Java Language Server Workspace** from the Command Palette, let VS Code restart, then run **Gradle: Refresh Gradle Project**.

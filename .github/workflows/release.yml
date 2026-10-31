@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Determine release version
+        id: release
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag="$GITHUB_REF_NAME"
+            version="${tag#v}"
+          else
+            minecraft_version="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+            if [[ -z "$minecraft_version" ]]; then
+              echo "Could not read minecraft_version from gradle.properties"
+              exit 1
+            fi
+
+            release_date="$(date -u +'%Y.%d.%m')"
+            prefix="v${minecraft_version}-${release_date}."
+            counter=-1
+            existing_commit_tag=""
+            while IFS= read -r existing_tag; do
+              suffix="${existing_tag#"$prefix"}"
+              if [[ "$suffix" =~ ^[0-9]+$ ]]; then
+                if [[ "$(git rev-list -n 1 "$existing_tag")" == "$GITHUB_SHA" ]]; then
+                  existing_commit_tag="$existing_tag"
+                fi
+                if (( 10#$suffix > counter )); then
+                  counter=$((10#$suffix))
+                fi
+              fi
+            done < <(git tag --list "${prefix}*")
+
+            tag="${existing_commit_tag:-${prefix}$((counter + 1))}"
+            version="${tag#v}"
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag"
+          echo "Project version: $version"
+
+      - name: Check formatting
+        run: ./gradlew spotlessCheck
+
+      - name: Build mod
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: ./gradlew build "-Pversion=$RELEASE_VERSION"
+
+      - name: Prepare release JAR
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          mkdir -p release
+          mapfile -t jars < <(
+            find build/libs -maxdepth 1 -name "betterdebugkeybinds-${RELEASE_VERSION}.jar" \
+              ! -name '*-sources.jar' \
+              ! -name '*-javadoc.jar' \
+              ! -name '*-dev.jar'
+          )
+
+          if [ "${#jars[@]}" -ne 1 ]; then
+            echo "Expected exactly one release JAR, found ${#jars[@]}"
+            printf '%s\n' "${jars[@]}"
+            exit 1
+          fi
+
+          cp "${jars[0]}" "release/${RELEASE_TAG}.jar"
+
+      - name: Push generated release tag
+        if: github.ref_type == 'branch'
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          if ! git rev-parse --verify "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag "$RELEASE_TAG"
+            git push origin "$RELEASE_TAG"
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          generate_release_notes: true
+          files: release/*.jar
