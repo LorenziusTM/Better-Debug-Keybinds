@@ -7,18 +7,18 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.KeyEvent;
+import org.jspecify.annotations.NonNull;
 
 public final class GlobalInputHandler {
 	private static Integer heldKey;
 
-	private GlobalInputHandler() {
-	}
+	private GlobalInputHandler() {}
 
 	public static void register() {
 		ClientTickEvents.END_CLIENT_TICK.register(GlobalInputHandler::onClientTick);
 	}
 
-	public static boolean handleKeyEvent(Minecraft client, int action, KeyEvent event) {
+	public static boolean handleKeyEvent(Minecraft client, int action, @NonNull KeyEvent event) {
 		if (action == InputConstants.RELEASE) {
 			if (heldKey != null && heldKey == event.key()) {
 				heldKey = null;
@@ -44,8 +44,14 @@ public final class GlobalInputHandler {
 			return matched;
 		}
 
-		return action == InputConstants.REPEAT && KeybindManager.actions().stream()
-				.anyMatch(debugAction -> debugAction.keyMapping().matches(event));
+		if (action == InputConstants.REPEAT) {
+			for (DebugAction debugAction : KeybindManager.actions()) {
+				if (debugAction.keyMapping().matches(event)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static void onClientTick(Minecraft client) {
@@ -59,9 +65,10 @@ public final class GlobalInputHandler {
 		}
 
 		for (DebugAction debugAction : KeybindManager.actions()) {
-			if (debugAction.repeatWhileHeld() && debugAction.keyMapping().matches(
-					InputConstants.Type.KEYBOARD.getOrCreate(heldKey)
-			)) {
+			if (debugAction.repeatWhileHeld()
+					&& debugAction
+							.keyMapping()
+							.matches(InputConstants.Type.KEYBOARD.getOrCreate(heldKey))) {
 				debugAction.execute(client);
 				return;
 			}

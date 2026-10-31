@@ -1,7 +1,7 @@
 package com.lorenzius.betterdebugkeybinds.client;
 
-import com.lorenzius.betterdebugkeybinds.client.keybind.KeybindManager;
 import com.lorenzius.betterdebugkeybinds.client.input.GlobalInputHandler;
+import com.lorenzius.betterdebugkeybinds.client.keybind.KeybindManager;
 import net.fabricmc.api.ClientModInitializer;
 
 public class BetterDebugKeybindsClient implements ClientModInitializer {

@@ -4,8 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 
 public final class DebugActions {
-	private DebugActions() {
-	}
+	private DebugActions() {}
 
 	public static void reloadSounds(Minecraft client) {
 		client.getSoundManager().reload();

@@ -21,6 +21,10 @@ Bindings can be changed without restarting. Shortcuts are handled globally, incl
 
 Run `.\gradlew.bat build` on Windows.
 
+## Formatting
+
+Java formatting is checked by Spotless in GitHub Actions on every push and pull request. Run `.\gradlew.bat spotlessCheck` locally to check formatting, or `.\gradlew.bat spotlessApply` to format the Java sources.
+
 ## VS Code
 
 Open the repository root as the workspace and install the recommended Java and Gradle extensions. VS Code is configured to import dependencies and source sets from the Gradle wrapper automatically. If Minecraft imports are still unresolved, run **Java: Clean Java Language Server Workspace** from the Command Palette, let VS Code restart, then run **Gradle: Refresh Gradle Project**.
