@@ -42,28 +42,28 @@ jobs:
 
     steps:
       - name: Checkout repository
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Java
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ matrix.gradle_java }}
 
       - name: Set up Gradle
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         uses: gradle/actions/setup-gradle@v6
 
       - name: Make Gradle wrapper executable
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         run: chmod +x ./gradlew
 
       - name: Determine release version
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         id: release
         shell: bash
         run: |
@@ -76,11 +76,11 @@ jobs:
           echo "Project version: $version"
 
       - name: Check formatting
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         run: ./gradlew spotlessCheck
 
       - name: Build mod
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: >-
@@ -92,7 +92,7 @@ jobs:
           "-Pjava_version=${{ matrix.java }}"
 
       - name: Prepare release JAR
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         shell: bash
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -115,7 +115,7 @@ jobs:
           cp "${jars[0]}" "release/${RELEASE_TAG}.jar"
 
       - name: Publish GitHub Release
-        if: contains(github.ref_name, format('-{0}-', matrix.minecraft))
+        if: contains(github.ref_name, format('-v{0}-', matrix.minecraft))
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
