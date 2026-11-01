@@ -27,9 +27,13 @@ Java formatting is checked by Spotless in GitHub Actions on every push and pull 
 
 ## Releases
 
-GitHub Actions builds Minecraft `26.3`, `26.2`, `26.1`, and `1.21.11` on pushes and pull requests. Each push to `main` publishes a separate GitHub Release for each version, with a version-specific JAR. The release tag format is `betterdebugkeybinds-v<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `betterdebugkeybinds-v26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases of that Minecraft version that day. To publish a manually tagged release, push a tag using the same format.
+GitHub Actions builds Minecraft `26.3`, `26.2`, `26.1`, and `1.21.11` on pushes and pull requests. Releases are tag-driven so you can publish only the versions you choose. From a clean, up-to-date `main` branch, run the matching PowerShell script, for example `.\scripts\release\release-26.3.ps1`. It pushes a version-specific tag; GitHub Actions builds and publishes only that version. Each supported version has a script under `scripts\release`.
 
-The version matrix in `.github/workflows/build.yml` and `.github/workflows/release.yml` specifies each Minecraft, Fabric Loader, Fabric API, and Java combination. Update both matrices when adding or changing a supported version, and add or select a matching `src/client/java-<profile>` source profile when Minecraft APIs differ. `gradle.properties` supplies the default versions for local development.
+Release tags use `betterdebugkeybinds-v<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `betterdebugkeybinds-v26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases of that Minecraft version that day.
+
+## Test a Minecraft version
+
+Run the matching script under `scripts\test` to launch Minecraft for manual testing, for example `.\scripts\test\run-1.21.11.ps1`. Gradle and Fabric Loom require Java 25; the 1.21.11 mod itself is compiled for Java 21. The supported version and dependency list is in `scripts\versions.json`. When adding a version, update that file, add release and test scripts, update both workflow matrices, and add or select a matching `src/client/java-<profile>` source profile if Minecraft APIs differ.
 
 ## VS Code
 
