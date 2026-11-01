@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - 'betterdebugkeybinds-v*'
 
 permissions:
   contents: write
@@ -17,39 +17,59 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - minecraft: '26.3'
+            loader: '0.20.1'
+            fabric_api: '0.165.0+26.3'
+            java: '25'
+          - minecraft: '26.2'
+            loader: '0.20.1'
+            fabric_api: '0.161.0+26.2'
+            java: '25'
+          - minecraft: '26.1'
+            loader: '0.20.1'
+            fabric_api: '0.145.1+26.1'
+            java: '25'
+          - minecraft: '1.21.11'
+            loader: '0.20.1'
+            fabric_api: '0.141.6+1.21.11'
+            java: '21'
 
     steps:
       - name: Checkout repository
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Java
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: ${{ matrix.java }}
 
       - name: Set up Gradle
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         uses: gradle/actions/setup-gradle@v6
 
       - name: Make Gradle wrapper executable
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         run: chmod +x ./gradlew
 
       - name: Determine release version
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         id: release
         shell: bash
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             tag="$GITHUB_REF_NAME"
-            version="${tag#v}"
+            version="${tag#betterdebugkeybinds-v}"
           else
-            minecraft_version="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-            if [[ -z "$minecraft_version" ]]; then
-              echo "Could not read minecraft_version from gradle.properties"
-              exit 1
-            fi
-
+            minecraft_version="${{ matrix.minecraft }}"
             release_date="$(date -u +'%Y.%d.%m')"
             prefix="betterdebugkeybinds-v${minecraft_version}-${release_date}."
             counter=-1
@@ -67,7 +87,7 @@ jobs:
             done < <(git tag --list "${prefix}*")
 
             tag="${existing_commit_tag:-${prefix}$((counter + 1))}"
-            version="${tag#v}"
+            version="${tag#betterdebugkeybinds-v}"
           fi
 
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -76,14 +96,23 @@ jobs:
           echo "Project version: $version"
 
       - name: Check formatting
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         run: ./gradlew spotlessCheck
 
       - name: Build mod
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
-        run: ./gradlew build "-Pversion=$RELEASE_VERSION"
+        run: >-
+          ./gradlew build
+          "-Pversion=$RELEASE_VERSION"
+          "-Pminecraft_version=${{ matrix.minecraft }}"
+          "-Ploader_version=${{ matrix.loader }}"
+          "-Pfabric_api_version=${{ matrix.fabric_api }}"
+          "-Pjava_version=${{ matrix.java }}"
 
       - name: Prepare release JAR
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         shell: bash
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -118,8 +147,10 @@ jobs:
           fi
 
       - name: Publish GitHub Release
+        if: github.ref_type != 'tag' || contains(github.ref_name, format('-{0}-', matrix.minecraft))
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
+          name: Better Debug Keybinds for Minecraft ${{ matrix.minecraft }} (${{ steps.release.outputs.version }})
           generate_release_notes: true
           files: release/*.jar

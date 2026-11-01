@@ -1,7 +1,20 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
 	id 'maven-publish'
 	id 'com.diffplug.spotless' version '7.2.1'
+}
+
+def remapMinecraft = project.minecraft_version.startsWith("1.")
+apply plugin: remapMinecraft ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
+def clientApiProfile
+if (project.minecraft_version == "1.21.11") {
+	clientApiProfile = "1.21"
+} else if (project.minecraft_version in ["26.1", "26.2", "26.3"]) {
+	clientApiProfile = project.minecraft_version
+} else {
+	throw new GradleException(
+			"No client API profile is configured for Minecraft ${project.minecraft_version}")
 }
 
 repositories {
@@ -23,13 +36,21 @@ loom {
 	}
 }
 
+sourceSets.client.java.srcDir "src/client/java-${clientApiProfile}"
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	if (remapMinecraft) {
+		mappings loom.officialMojangMappings()
+	}
+	def modDependencyConfiguration = remapMinecraft ? "modImplementation" : "implementation"
+	add(modDependencyConfiguration, "net.fabricmc:fabric-loader:${project.loader_version}")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	add(
+			modDependencyConfiguration,
+			"net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
 }
 
 spotless {
@@ -39,17 +60,32 @@ spotless {
 	}
 }
 
+def minecraftVersion = project.minecraft_version
+def javaVersion = project.java_version
+
 processResources {
 	def version = project.version
 	inputs.property "version", version
+	inputs.property "minecraft_version", minecraftVersion
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand(
+				"version": version,
+				"minecraft_version": minecraftVersion,
+				"java_version": javaVersion)
+	}
+}
+
+tasks.named("processClientResources") {
+	inputs.property "java_version", javaVersion
+
+	filesMatching("betterdebugkeybinds.client.mixins.json") {
+		expand "java_version": javaVersion
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = project.java_version.toInteger()
 }
 
 java {
@@ -58,8 +94,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.toVersion(project.java_version)
+	targetCompatibility = JavaVersion.toVersion(project.java_version)
 }
 
 jar {

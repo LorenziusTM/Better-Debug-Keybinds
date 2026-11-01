@@ -2,7 +2,7 @@
 
 Client-side Fabric mod for binding Minecraft debug actions to independent keys.
 
-## Reload chunks
+## Options
 
 These actions are available in **Options → Controls → Key Binds** under **Debug Keybinds**:
 
@@ -27,7 +27,9 @@ Java formatting is checked by Spotless in GitHub Actions on every push and pull 
 
 ## Releases
 
-Every push to `main` creates a GitHub Release with the built mod JAR. Release tags use `v<mod name>-<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `vbetterdebugkeybinds-26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases that day. Pushing a `v*` tag also publishes a release for that tag.
+GitHub Actions builds Minecraft `26.3`, `26.2`, `26.1`, and `1.21.11` on pushes and pull requests. Each push to `main` publishes a separate GitHub Release for each version, with a version-specific JAR. The release tag format is `betterdebugkeybinds-v<Minecraft version>-<UTC year>.<day>.<month>.<daily counter>`, for example `betterdebugkeybinds-v26.3-2026.30.10.0`. The counter starts at `0` each UTC day and increments for additional releases of that Minecraft version that day. To publish a manually tagged release, push a tag using the same format.
+
+The version matrix in `.github/workflows/build.yml` and `.github/workflows/release.yml` specifies each Minecraft, Fabric Loader, Fabric API, and Java combination. Update both matrices when adding or changing a supported version, and add or select a matching `src/client/java-<profile>` source profile when Minecraft APIs differ. `gradle.properties` supplies the default versions for local development.
 
 ## VS Code
 

@@ -1,0 +1,6 @@
+VS CODE WORKSPACE DIAGNOSTICS
+Generated: 11/1/2026, 4:10:33 PM
+Workspace: c:\code\BetterDebugKeybinds
+Total diagnostic entries: 0
+
+No diagnostics were reported by currently active VS Code language tools.
